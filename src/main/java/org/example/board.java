@@ -21,7 +21,7 @@ public class board {
             } else if(cmd.equals("list")) {
                 list();
             } else if(cmd.equals("update")) {
-
+                update();
             } else if(cmd.equals("exit")) {
                 System.out.println("프로그램 종료.");
                 break;
@@ -31,12 +31,13 @@ public class board {
     }
 
     static void list() {
+        Connection conn = null;
         Statement stmt = null; // SQL 전송하는 객체
         ResultSet rs = null;
 
         try {
 
-            Connection conn = getConnection();
+            conn = getConnection();
             stmt = conn.createStatement();
             String sql = String.format("SELECT * FROM add_book");
             rs = stmt.executeQuery(sql);
@@ -53,14 +54,27 @@ public class board {
                 System.out.printf("전화번호 : %s\n", phone);
                 System.out.println("===========================");
             }
-
-
         } catch(Exception e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if(rs != null){
+                    // 만들어진 순서의 역순으로 close해주기
+                    rs.close();
+                }
+                if(stmt != null){
+                    stmt.close();
+                }if(conn != null){
+                    conn.close();
+                }
+            } catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 
     static void add() {
+        Connection conn = null;
 
         System.out.print("이름 : ");
         String name = scan.nextLine();
@@ -72,15 +86,30 @@ public class board {
         Statement stmt = null; // SQL 전송하는 객체
 
         try {
-            Connection conn = getConnection();
+            conn = getConnection();
             stmt = conn.createStatement();
 
             String sql = String.format("INSERT INTO add_book SET `name` = '%s', `address` = '%s', `phone` = '%s'", name, address, phone);
             stmt.executeUpdate(sql);
-
-        } catch(Exception e) {
-            e.printStackTrace();  // 에러를 더 자세히 알려줌
         }
+
+        catch(Exception e) {
+            e.printStackTrace();  // 에러를 더 자세히 알려줌
+        } finally {
+            try {
+                if(stmt != null){
+                    stmt.close();
+                }if(conn != null){
+                    conn.close();
+                }
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    static void update(){
+
     }
 
     static Connection getConnection() {
