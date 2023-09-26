@@ -4,10 +4,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class board {
     static Scanner scan = new Scanner(System.in);
+    static AddView addView = new AddView();
+    static  AddressRepository addressRepository = new AddressRepository();
     public static void main(String[] args) {
 
 
@@ -31,46 +34,8 @@ public class board {
     }
 
     static void list() {
-        Connection conn = null;
-        Statement stmt = null; // SQL 전송하는 객체
-        ResultSet rs = null;
-
-        try {
-
-            conn = getConnection();
-            stmt = conn.createStatement();
-            String sql = String.format("SELECT * FROM add_book");
-            rs = stmt.executeQuery(sql);
-
-            while(rs.next()) {
-                int id = rs.getInt("id");
-                String name = rs.getString("name");
-                String address = rs.getString("address");
-                String phone = rs.getString("phone");
-
-                System.out.printf("번호 : %d\n", id);
-                System.out.printf("이름 : %s\n", name);
-                System.out.printf("주소 : %s\n", address);
-                System.out.printf("전화번호 : %s\n", phone);
-                System.out.println("===========================");
-            }
-        } catch(Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if(rs != null){
-                    // 만들어진 순서의 역순으로 close해주기
-                    rs.close();
-                }
-                if(stmt != null){
-                    stmt.close();
-                }if(conn != null){
-                    conn.close();
-                }
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-        }
+        ArrayList<Address> addressList = addressRepository.getAllAddresses();
+        addView.printAddresses(addressList);
     }
 
     static void add() {
@@ -86,7 +51,7 @@ public class board {
         Statement stmt = null; // SQL 전송하는 객체
 
         try {
-            conn = getConnection();
+            conn = addressRepository.getConnection();
             stmt = conn.createStatement();
 
             String sql = String.format("INSERT INTO add_book SET `name` = '%s', `address` = '%s', `phone` = '%s'", name, address, phone);
@@ -112,25 +77,5 @@ public class board {
 
     }
 
-    static Connection getConnection() {
 
-        Connection conn = null; // DB 접속하는 객체
-
-        String url = "jdbc:mysql://localhost:3306/ad?serverTimezone=UTC";
-        String user = "root";
-        String pass = "";
-
-        try {
-            // 1. 드라이버 세팅
-            Class.forName("com.mysql.cj.jdbc.Driver");
-
-            // 2. Connection 획득
-            conn = DriverManager.getConnection(url, user, pass);
-
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-
-        return conn;
-    }
 }
